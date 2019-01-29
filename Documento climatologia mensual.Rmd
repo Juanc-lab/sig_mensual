@@ -1,0 +1,94 @@
+---
+title: "Climatologia de Colombia mensual"
+author: "SAFECROP"
+date: "28 de enero de 2019"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r librerias, include=FALSE}
+
+# 1. CARGAR LIBRERIAS----------------------------------
+library(flexdashboard)
+library (sp)
+library(rgdal) 
+library (raster) # para el comando click?
+library(tmap)
+library(leaflet)
+library(rgdal)
+library(rgeos)
+library(raster)
+library(dismo)
+library(RColorBrewer)
+library(leaflet)
+library(adehabitatHR)
+library(tmaptools)
+library(spatstat)
+library(gstat)
+library(adehabitatLT)
+library(xts)
+library(spatstat)
+library(spData)
+library(classInt)
+#2. CARGAR SHAPES--------------------------
+
+SP_DEPARTAMENTOS_COLOMBIA <- readOGR("C:/Users/User/projects/project_sig/shape", "WGS_1984_DEPTO")
+
+# 3. CARGAR RASTER---------------------------------
+RASTER_PPT<- raster("C:/Users/User/projects/project_sig/raster/CLIM_ENE_PPT.tif", package= "raster")
+RASTER_TMED<- raster("C:/Users/User/Dropbox/TRABAJO RSTUDIO/Rscrips/10. MAPA_CLIMA_COLOMBIA/CLIM_DIC_T_MED.tif", package= "raster")
+
+# 4. PONER MASCARAS------------------------
+MASK_RASTER_PPT <- mask(RASTER_PPT, SP_DEPARTAMENTOS_COLOMBIA)
+MASK_RASTER_TMED <- mask(RASTER_TMED, SP_DEPARTAMENTOS_COLOMBIA)
+# 5. DEFINICION DE VARIABLES--------------------------------
+PALETA_OSPA_24H <- c("#FFFFFF","#00FFFF","#00CDCD","#009ACD","#00008B","#00FF00","#00CD00","#008B00","#FFFF00","#EE9A00","#FFA500","#FF0000","#EE0000","#8B0000", "#8B008B")
+BREACCS_24H <- c(0,0.1,1,2,4,5,6,8,10,15,20,30,40,60,80,100, Inf)
+PALETA_OSPA_1YEAR <- c("#CD0000","#FF4500","#FFFF00", "#98FB98", "#00FF00","#008B00","#BFEFFF","#66CDAA","#0000CD","#191970","#FFB6C1","#C71585")
+BREACCS_1YEAR<- c(0,500,1000,1500,2000,2500,3000,4000,5000,7000,9000,11000, Inf)
+
+PALETA_OSPA_1MONTH <- c("#CD0000", "#FF4500","#FFC125", "#FFD700",  "#F5F5F5","#ABABAB","#8B8B7A","#5CACEE","#7A67EE","#191970","#C71585")
+BREACCS_1MONTH<- c(0,20,40,60,100,120,150,200,300,400,600,800, Inf)
+
+BREACCS_DAY <- c(0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,31)
+PALETA_TEMP_24H <- c("#FFFFFF","#8B008B","#9A32CD","#00008B","#0000EE","#1C86EE","#00BFFF","#97FFFF","#C1FFC1","#7FFF00","#CAFF70","#FFFF00","#FFB90F","#FF7F00","#FF4040","#CD3333","#FF1493","#EE1289","#8B0A50","#8B3A3A")
+BREACCS_TMED_24H <- c(4,6,8,10,12,14,16,18,20,22,24,26,28,30, Inf)
+```
+
+### 1. CLIMATOLOGIA DE LAS LLUVIAS EN ENERO
+
+Durante el mes de enero, los volumenes de lluvias más importartes se concentran en las regiones Pacífica y Amazónica. 
+
+```{r pressure, echo=FALSE, warning=FALSE, message= FALSE}
+tmap_mode("view")
+tm_basemap(leaflet::providers$OpenStreetMap.Mapnik)+
+tm_shape(MASK_RASTER_PPT, bbox = "Cundinamarca") + 
+tm_raster("CLIM_ENE_PPT", style = "fixed", breaks =BREACCS_1MONTH, palette = PALETA_OSPA_1MONTH,
+legend.show = TRUE, alpha = 0.7) + tm_shape(SP_DEPARTAMENTOS_COLOMBIA)+
+tm_borders(col = "BLACK", lwd = 1, lty = "solid", alpha = 0.3, group = NA)
+
+```
+
+###2.TEMPERATURA MEDIA DE ENERO
+
+las máximas temperaturas se concentran en sectores de La Guajira
+```{r tmed, echo=FALSE, message=FALSE}
+tm_basemap(leaflet::providers$OpenStreetMap.Mapnik)+
+tm_shape(MASK_RASTER_TMED, bbox = "Cundinamarca") +
+tm_raster("CLIM_DIC_T_MED", style = "fixed", breaks = BREACCS_TMED_24H , palette = "-Spectral", legend.show =TRUE, alpha = 0.9) +
+tm_shape(SP_DEPARTAMENTOS_COLOMBIA)+
+tm_borders(col = "BLACK", lwd = 1, lty = "solid", alpha = 0.3, group = NA)
+
+
+
+```
+
+```{r}
+
+```
+
